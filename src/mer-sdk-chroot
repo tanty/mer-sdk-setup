@@ -151,7 +151,13 @@ mount_bind() {
 	echo "Directory $1 is missing in SDK root - please report this bug"
 	mkdir -p ${sdkroot}$1
     fi
-    mount --bind $1 ${sdkroot}$1
+
+    if [[ -L ${sdkroot}$1 ]]; then
+	echo "Directory $1 is a soft link. Mounting the real directory ..."
+        mount_bind $(readlink -f ${sdkroot}$1)
+    else
+        mount --bind $1 ${sdkroot}$1
+    fi
 }
 prepare_mountpoints() {
     # Make parent mountpoint not shared with parent namespace
